@@ -12,7 +12,7 @@ from models import MedicalReportData, MedicalReportDataDetailed, ErrorResponse
 from ocr_service import OCRService
 from field_parser import FieldParser
 from utils import validate_file, save_uploaded_file, format_medical_response
-
+from fastapi.middleware.cors import CORSMiddleware
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,6 +21,14 @@ app = FastAPI(
     title="Medical Report OCR Extractor",
     description="A FastAPI service that extracts structured medical data from PDF and image reports using Tesseract OCR",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # <-- 🔥 You can specify origins later
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Initialize services
@@ -49,7 +57,7 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "Medical Report OCR Extractor"}
 
-@app.post("/extract", response_model=MedicalReportData)
+@app.post("/extract", response_model=MedicalReportData) 
 async def extract_medical_data(file: UploadFile = File(...)):
     """
     Extract structured medical data from uploaded PDF or image file
